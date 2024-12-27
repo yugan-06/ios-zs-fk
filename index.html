@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>魔盒APP证书系统</title>
+    <style>
+        :root {
+            --primary-color: #4a90e2;
+            --secondary-color: #f5f6fa;
+            --accent-color: #2980b9;
+            --text-color: #2c3e50;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+            color: var(--text-color);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+
+        /* 登录界面 */
+        .login-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .login-container.hidden {
+            display: none;
+        }
+
+        .password-input {
+            width: 100%;
+            max-width: 300px;
+            padding: 12px;
+            margin: 20px 0;
+            border: 2px solid var(--secondary-color);
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        /* 主界面 */
+        .main-container {
+            display: none;
+        }
+
+        .main-container.visible {
+            display: block;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h2 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        /* 卡密选择器 */
+        .kammi-selector {
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .kammi-count {
+            padding: 10px;
+            width: 100px;
+            border: 2px solid var(--secondary-color);
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+
+        /* 卡密展示区 */
+        .kammi-list {
+            margin-top: 20px;
+            padding: 15px;
+            background: var(--secondary-color);
+            border-radius: 5px;
+        }
+
+        .kammi-item {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: monospace;
+            font-size: 16px;
+        }
+
+        /* 按钮样式 */
+        .btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            background: var(--accent-color);
+        }
+
+        .copy-btn {
+            background: var(--secondary-color);
+            color: var(--primary-color);
+            padding: 8px 15px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .notice {
+            text-align: center;
+            color: #666;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+
+        .kammi-info {
+            text-align: center;
+            margin: 10px 0;
+            padding: 10px;
+            background: var(--secondary-color);
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .kammi-info p {
+            margin: 0;
+            color: var(--accent-color);
+        }
+
+        #remainingCount {
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .used-kammi-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid var(--secondary-color);
+        }
+
+        .used-kammi-section h3 {
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+
+        .used-kammi-list {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .used-kammi-item {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .used-kammi-time {
+            color: #999;
+        }
+
+        .clear-btn {
+            background: #e74c3c;
+            padding: 8px 15px;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .clear-btn:hover {
+            background: #c0392b;
+        }
+
+        .slider-container {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin: 0 15px;
+        }
+
+        .slider {
+            -webkit-appearance: none;
+            width: 200px;
+            height: 8px;
+            border-radius: 5px;
+            background: var(--secondary-color);
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .slider:hover::-webkit-slider-thumb {
+            background: var(--accent-color);
+            transform: scale(1.1);
+        }
+
+        .slider:hover::-moz-range-thumb {
+            background: var(--accent-color);
+            transform: scale(1.1);
+        }
+
+        #kammiCountDisplay {
+            min-width: 50px;
+            font-size: 16px;
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        /* 优化卡密列表样式，支持更多卡密显示 */
+        .kammi-list {
+            max-height: 400px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary-color) var(--secondary-color);
+        }
+
+        .kammi-list::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .kammi-list::-webkit-scrollbar-track {
+            background: var(--secondary-color);
+            border-radius: 4px;
+        }
+
+        .kammi-list::-webkit-scrollbar-thumb {
+            background-color: var(--primary-color);
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 登录界面 -->
+        <div class="login-container" id="loginContainer">
+            <h2>魔盒APP证书系统</h2>
+            <input type="password" class="password-input" id="passwordInput" placeholder="请输入访问密码">
+            <button class="btn" onclick="verifyPassword()">登录</button>
+        </div>
+
+        <!-- 主界面 -->
+        <div class="main-container" id="mainContainer">
+            <div class="card">
+                <h2>魔盒APP证书卡密系统</h2>
+                <div class="kammi-info">
+                    <p>剩余卡密数量：<span id="remainingCount">${kammiData.length}</span></p>
+                </div>
+                <div class="kammi-selector">
+                    <label>选择卡密数量：</label>
+                    <div class="slider-container">
+                        <input type="range" min="1" max="50" value="5" class="slider" id="kammiCount">
+                        <span id="kammiCountDisplay">5张</span>
+                    </div>
+                    <button class="btn" onclick="generateKammi()">生成卡密</button>
+                </div>
+                <div class="kammi-list" id="kammiList">
+                    <!-- 卡密将在这里显示 -->
+                </div>
+                <p class="notice">注意：每个卡密仅能使用一次，请妥善保管</p>
+                <div class="used-kammi-section">
+                    <h3>已使用卡密记录</h3>
+                    <button class="btn clear-btn" onclick="clearUsedKammi()">清除记录</button>
+                    <div id="usedKammiList" class="used-kammi-list">
+                        <!-- 已使用的卡密将在这里显示 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 卡密数据（实际使用时应该从服务器获取）
+        let kammiData = [];
+
+        // 记录已使用的卡密
+        let usedKammi = [];
+
+        // 从txt文件读取卡密
+        async function loadKammiFromFile() {
+            try {
+                const response = await fetch('./kammi.txt?' + new Date().getTime());
+                const text = await response.text();
+                console.log('读取到的卡密:', text);
+                return text.split('\n').filter(line => line.trim());
+            } catch (error) {
+                console.error('读取卡密文件失败:', error);
+                alert('读取卡密文件失败: ' + error.message);
+                return [];
+            }
+        }
+
+        // 更新txt文件内容
+        async function updateKammiFile(remainingKammi) {
+            try {
+                const response = await fetch('./update_kammi.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        kammi: remainingKammi.join('\n')
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(result.error || '更新卡密文件失败');
+                }
+                
+                return result;
+            } catch (error) {
+                console.error('更新卡密文件失败:', error);
+                throw error;
+            }
+        }
+
+        // 验证密码
+        function verifyPassword() {
+            const password = document.getElementById('passwordInput').value;
+            if (password === 'yugan666') {
+                document.getElementById('loginContainer').classList.add('hidden');
+                document.getElementById('mainContainer').classList.add('visible');
+            } else {
+                alert('密码错误，请重试！');
+            }
+        }
+
+        // 生成卡密
+        async function generateKammi() {
+            const count = parseInt(document.getElementById('kammiCount').value);
+            const generateBtn = document.querySelector('.kammi-selector .btn');
+            
+            try {
+                // 添加加载状态
+                generateBtn.disabled = true;
+                generateBtn.textContent = '生成中...';
+                
+                // 读取最新的卡密数据
+                const response = await fetch('./kammi.txt?' + new Date().getTime());
+                const text = await response.text();
+                kammiData = text.split('\n').filter(line => line.trim());
+                
+                if (kammiData.length < count) {
+                    alert('可用卡密不足！');
+                    return;
+                }
+
+                // 选择指定数量的卡密
+                const selectedKammi = kammiData.slice(0, count);
+                
+                // 更新剩余卡密
+                kammiData = kammiData.slice(count);
+                
+                // 显示选中的卡密
+                const kammiListElement = document.getElementById('kammiList');
+                kammiListElement.innerHTML = selectedKammi.map(kammi => `
+                    <div class="kammi-item">
+                        <span>${kammi}</span>
+                        <button class="copy-btn" onclick="copyKammi('${kammi}')">复制卡密</button>
+                    </div>
+                `).join('');
+
+                // 将使用过的卡密写入本地存储
+                selectedKammi.forEach(kammi => saveUsedKammi(kammi));
+
+                // 更新txt文件中的剩余卡密
+                await updateKammiFile(kammiData);
+
+                // 更新剩余卡密数量显示
+                updateKammiCount();
+                displayUsedKammi();
+            } catch (error) {
+                console.error('生成卡密失败:', error);
+                alert('生成卡密失败，请重试');
+            } finally {
+                // 恢复按钮状态
+                generateBtn.disabled = false;
+                generateBtn.textContent = '生成卡密';
+            }
+        }
+
+        // 添加保存使用过的卡密功能
+        function saveUsedKammi(kammi) {
+            let usedKammiList = JSON.parse(localStorage.getItem('usedKammi') || '[]');
+            usedKammiList.push({
+                kammi: kammi,
+                useTime: new Date().toLocaleString()
+            });
+            localStorage.setItem('usedKammi', JSON.stringify(usedKammiList));
+        }
+
+        // 初始化时检查并加载卡密
+        async function initKammiSystem() {
+            try {
+                // 从文件加载卡密
+                const response = await fetch('./kammi.txt?' + new Date().getTime());
+                const text = await response.text();
+                kammiData = text.split('\n').filter(line => line.trim());
+                
+                // 更新剩余数量显示
+                updateKammiCount();
+                displayUsedKammi();
+            } catch (error) {
+                console.error('初始化失败:', error);
+                alert('系统初始化失败，请刷新页面重试');
+            }
+        }
+
+        // 页面加载时初始化
+        window.addEventListener('load', () => {
+            initKammiSystem();
+        });
+
+        // 更新剩余卡密数量显示
+        function updateKammiCount() {
+            const countElement = document.getElementById('remainingCount');
+            countElement.textContent = kammiData.length;
+        }
+
+        // 复制卡密
+        function copyKammi(kammi) {
+            navigator.clipboard.writeText(kammi).then(() => {
+                alert('卡密已复制到剪贴板！');
+            }).catch(err => {
+                console.error('复制失败:', err);
+                alert('复制失败，请手动复制');
+            });
+        }
+
+        // 按下回车键时验证密码
+        document.getElementById('passwordInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                verifyPassword();
+            }
+        });
+
+        // 添加显示已使用卡密的函数
+        function displayUsedKammi() {
+            const usedKammiList = JSON.parse(localStorage.getItem('usedKammi') || '[]');
+            const usedKammiElement = document.getElementById('usedKammiList');
+            
+            if (usedKammiList.length === 0) {
+                usedKammiElement.innerHTML = '<p class="no-records">暂无使用记录</p>';
+                return;
+            }
+
+            usedKammiElement.innerHTML = usedKammiList.reverse().map(item => `
+                <div class="used-kammi-item">
+                    <span class="used-kammi-code">${item.kammi}</span>
+                    <span class="used-kammi-time">${item.useTime}</span>
+                </div>
+            `).join('');
+        }
+
+        // 添加清除记录功能
+        function clearUsedKammi() {
+            if (confirm('确定要清除所有使用记录吗？')) {
+                localStorage.removeItem('usedKammi');
+                displayUsedKammi();
+            }
+        }
+
+        // 监听滑动条变化
+        document.getElementById('kammiCount').addEventListener('input', function() {
+            document.getElementById('kammiCountDisplay').textContent = this.value + '张';
+        });
+    </script>
+</body>
+</html>
+
